@@ -1,23 +1,21 @@
-{-# LANGUAGE CPP              #-}
+{-# LANGUAGE CPP #-}
 {-# OPTIONS -fno-warn-orphans #-}
 
 module Main (main) where
 
-import Control.Monad ((>=>))
-import Data.Char (isAlphaNum, isUpper)
-import Data.Function (on)
-import Data.Maybe (isJust, isNothing)
-import Data.Semigroup
-import Data.Text (Text)
-import Test.Hspec
-import Test.QuickCheck
-import Web.HttpApiData
-import Web.PathPieces
-import Web.Slug
-import qualified Data.Text as T
+import           Control.Monad       ((>=>))
+import           Data.Char           (isAlphaNum, isUpper)
+import           Data.Function       (on)
+import           Data.Maybe          (isJust, isNothing)
+import           Data.Semigroup
+import           Data.Text           (Text)
+import qualified Data.Text           as T
+import           Test.Hspec
+import           Test.QuickCheck
+import           Web.Slug
 
 #if !MIN_VERSION_base(4,8,0)
-import Control.Applicative ((<$>))
+import           Control.Applicative ((<$>))
 #endif
 
 main :: IO ()
@@ -54,12 +52,6 @@ spec = do
     it "incorrect Slug won't be read successfully" $
       property $ \x -> isNothing (parseSlug x) ==>
         (reads (show x) :: [(Slug, String)]) === []
-    it "valid Slug text is a valid path piece" $
-      property $ \slug ->
-        fromPathPiece (unSlug slug) === Just slug
-    it "valid Slug text is a valid HTTP API data" $
-      property $ \slug ->
-        parseUrlPiece (toUrlPiece slug) === Right (slug :: Slug)
   describe "Semigroup instance of Slug" $
     it "the (<>) operation produces valid slugs in all cases" $
       property $ \x y -> do

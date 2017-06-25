@@ -22,27 +22,22 @@ module Web.Slug
   , SlugException (..) )
 where
 
-import Control.Exception (Exception (..))
-import Control.Monad
-import Control.Monad.Catch (MonadThrow (..))
-import Data.Aeson.Types (ToJSON (..), FromJSON (..))
-import Data.Char (isAlphaNum)
-import Data.Data (Data)
-import Data.Maybe (isJust, fromJust)
-import Data.Semigroup
-import Data.Text (Text)
-import Data.Typeable (Typeable)
-import Database.Persist.Class (PersistField (..))
-import Database.Persist.Sql (PersistFieldSql (..))
-import Database.Persist.Types (SqlType (..))
-import Test.QuickCheck
-import Web.HttpApiData
-import Web.PathPieces
-import qualified Data.Aeson as A
-import qualified Data.Text  as T
+import           Control.Exception   (Exception (..))
+import           Control.Monad
+import           Control.Monad.Catch (MonadThrow (..))
+import qualified Data.Aeson          as A
+import           Data.Aeson.Types    (FromJSON (..), ToJSON (..))
+import           Data.Char           (isAlphaNum)
+import           Data.Data           (Data)
+import           Data.Maybe          (fromJust, isJust)
+import           Data.Semigroup
+import           Data.Text           (Text)
+import qualified Data.Text           as T
+import           Data.Typeable       (Typeable)
+import           Test.QuickCheck
 
 #if !MIN_VERSION_base(4,8,0)
-import Control.Applicative
+import           Control.Applicative
 #endif
 
 -- | This exception is thrown by 'mkSlug' when its input cannot be converted
@@ -153,38 +148,8 @@ instance ToJSON Slug where
 instance FromJSON Slug where
   parseJSON = A.withText "Slug" $ \txt ->
     case parseSlug txt of
-      Left err -> fail (show err)
+      Left err  -> fail (show err)
       Right val -> return val
-
-instance PersistField Slug where
-  toPersistValue   = toPersistValue . unSlug
-  fromPersistValue =
-    fromPersistValue >=> either (Left . T.pack . f) Right . parseSlug
-    where
-#if MIN_VERSION_base(4,8,0)
-      f = displayException
-#else
-      f = show
-#endif
-
-instance PersistFieldSql Slug where
-  sqlType = const SqlString
-
-instance PathPiece Slug where
-  fromPathPiece = parseSlug
-  toPathPiece   = unSlug
-
-instance ToHttpApiData Slug where
-  toUrlPiece = unSlug
-
-instance FromHttpApiData Slug where
-  parseUrlPiece = either (Left . T.pack . f) Right . parseSlug
-    where
-#if MIN_VERSION_base(4,8,0)
-      f = displayException
-#else
-      f = show
-#endif
 
 instance Arbitrary Slug where
   arbitrary = fromJust <$> (mkSlug . T.pack <$> arbitrary) `suchThat` isJust
