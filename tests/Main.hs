@@ -86,6 +86,10 @@ spec = do
         property $ \n slug -> (n > 0) ==> do
           t <- truncateSlug n slug
           T.length (unSlug t) `shouldSatisfy` (<= n)
+  describe "unsafeSlug" $
+    it "creates a slug from a trusted text value" $
+      property $ \slug ->
+        unSlug (unsafeSlug slug) `shouldBe` slug
 
 ----------------------------------------------------------------------------
 -- Helpers

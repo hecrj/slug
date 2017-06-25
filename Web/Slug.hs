@@ -19,6 +19,7 @@ module Web.Slug
   , unSlug
   , parseSlug
   , truncateSlug
+  , unsafeSlug
   , SlugException (..) )
 where
 
@@ -118,6 +119,9 @@ parseSlug v = mkSlug v >>= check
       if unSlug s == v
         then return s
         else throwM (InvalidSlug v)
+
+unsafeSlug :: Text -> Slug
+unsafeSlug = Slug
 
 -- | Ensure that given 'Slug' is not longer than given maximum number of
 -- characters. If truncated slug ends in a dash, remove that dash too. (Dash
